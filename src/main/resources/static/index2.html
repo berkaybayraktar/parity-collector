@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello WebSocket2</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+
+        #main-content {
+            max-width: 940px;
+            padding: 2em 3em;
+            margin: 0 auto 20px;
+            background-color: #fff;
+            border: 1px solid #e5e5e5;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+        }
+    </style>
+
+    <script type="text/javascript">
+        var socketConn = null;
+
+        $(function () {
+            $("form").on('submit', function (e) {
+                e.preventDefault();
+            });
+            $("#connect").click(function () {
+                connect();
+            });
+            $("#disconnect").click(function () {
+                disconnect();
+            });
+
+            connect();
+        });
+
+        function connect() {
+            //Open the web socket connection to the server
+            socketConn = new WebSocket('ws://' + window.location.hostname + ':' + window.location.port + '/parity2/websocket');
+
+            socketConn.addEventListener('open', function () {
+                setConnected(true);
+                socketConn.send("/topic/parities");
+            });
+
+            socketConn.onmessage = function (event) {
+                var parities = JSON.parse(event.data);
+                console.log(parities);
+
+                for (var k in parities) {
+                    showParity(parities[k]);
+                }
+            }
+        }
+
+        function showParity(parity) {
+            if ($("#parity-" + parity.paritySymbol)[0] != null) {
+                $("#parity-" + parity.paritySymbol).html(parity.price);
+            } else {
+                $("#parities").append("<tr><td>" + parity.paritySymbol + "</td><td id='parity-" + parity.paritySymbol + "'>" + parity.price + "</td></tr>");
+            }
+        }
+
+        function setConnected(connected) {
+            $("#connect").prop("disabled", connected);
+            $("#disconnect").prop("disabled", !connected);
+        }
+
+        function disconnect() {
+            if (socketConn !== null) {
+                socketConn.close();
+            }
+
+            setConnected(false);
+
+            console.log("Disconnected");
+        }
+    </script>
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+<div class="container" id="main-content">
+    <div class="row">
+        <div class="col-md-12">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="connect">WebSocket connection:</label>
+                    <button class="btn btn-default" id="connect" type="submit">Connect</button>
+                    <button class="btn btn-default" disabled="disabled" id="disconnect" type="submit">Disconnect
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped" id="parity-table">
+                <thead>
+                <tr>
+                    <th>Parity Symbol</th>
+                    <th>Parity Price</th>
+                </tr>
+                </thead>
+                <tbody id="parities">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

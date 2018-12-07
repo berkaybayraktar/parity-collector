@@ -1,4 +1,4 @@
-package com.ub.paritycollector.web.websocket;
+package com.ub.paritycollector.web.stomp;
 
 import com.ub.paritycollector.domain.Parity;
 import com.ub.paritycollector.service.parity.ParityService;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class ParityWebsocketScheduler {
+public class ParityStompMessageSender {
 
-    private final Logger log = LoggerFactory.getLogger(ParityWebsocketScheduler.class);
+    private final Logger log = LoggerFactory.getLogger(ParityStompMessageSender.class);
 
     private final SimpMessagingTemplate template;
 
@@ -22,11 +22,11 @@ public class ParityWebsocketScheduler {
      * Dependency Injection
      */
     @Autowired
-    public ParityWebsocketScheduler(SimpMessagingTemplate template) {
+    public ParityStompMessageSender(SimpMessagingTemplate template) {
         this.template = template;
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 5000)
     public void publishParities() throws Exception {
         log.info("Publishing all parities to websocket clients");
 

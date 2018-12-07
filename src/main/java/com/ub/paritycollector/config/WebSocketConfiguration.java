@@ -18,7 +18,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/parity-websocket").withSockJS();
+        registry.addEndpoint("/parity/websocket").withSockJS();
     }
 
 }

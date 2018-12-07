@@ -16,7 +16,7 @@ $(function () {
 });
 
 function connect() {
-    var socket = new SockJS('/parity-websocket');
+    var socket = new SockJS('/parity/websocket');
 
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {

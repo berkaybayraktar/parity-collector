@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -25,7 +26,7 @@ public class BinanceParityCollector extends AbstractParityCollector {
      */
     private static final BinanceParityCollector INSTANCE = new BinanceParityCollector();
     private final Logger log = LoggerFactory.getLogger(BinanceParityCollector.class);
-    private ParameterizedTypeReference<Map<String, String>> responseType = new ParameterizedTypeReference<Map<String, String>>() {
+    private ParameterizedTypeReference<List<Map<String, String>>> responseType = new ParameterizedTypeReference<List<Map<String, String>>>() {
     };
 
     private BinanceParityCollector() {
@@ -44,20 +45,23 @@ public class BinanceParityCollector extends AbstractParityCollector {
 
         RestTemplate restTemplate = RestService.getInstance().getRestTemplate();
 
-        Stream.of(ParitySymbol.values())
-                .filter(paritySymbol -> paritySymbol.getParityCollectorClass() == BinanceParityCollector.class)
-                .forEach(paritySymbol -> {
+        try {
+            ResponseEntity<List<Map<String, String>>> response = restTemplate.exchange(RequestEntity.get(new URI("https://api.binance.com/api/v3/ticker/price")).accept(MediaType.APPLICATION_JSON).build(), responseType);
 
-                    try {
-                        ResponseEntity<Map<String, String>> response = restTemplate.exchange(RequestEntity.get(new URI("https://api.binance.com/api/v1/ticker/24hr?symbol=" + paritySymbol.name())).accept(MediaType.APPLICATION_JSON).build(), responseType);
+            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+                return null;
+            }
 
-                        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                            result.put(paritySymbol, new BigDecimal(response.getBody().get("lastPrice")));
-                        }
+            response.getBody().forEach(pairMap -> {
+                ParitySymbol paritySymbol = ParitySymbol.valueOf(pairMap.get("symbol"));
 
-                    } catch (URISyntaxException ignored) {
-                    }
-                });
+                if (paritySymbol.getParityCollectorClass().equals(BinanceParityCollector.class)) {
+                    result.put(paritySymbol, new BigDecimal(pairMap.get("price")));
+                }
+            });
+
+        } catch (URISyntaxException ignored) {
+        }
 
         log.info("Parity Prices from Binance API are loaded, {}", result);
 

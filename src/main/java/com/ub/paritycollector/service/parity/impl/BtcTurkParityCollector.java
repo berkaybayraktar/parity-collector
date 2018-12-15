@@ -51,10 +51,14 @@ public class BtcTurkParityCollector extends AbstractParityCollector {
             }
 
             response.getBody().forEach(pairMap -> {
-                ParitySymbol paritySymbol = ParitySymbol.valueOf(pairMap.get("pair"));
+                try {
 
-                if (paritySymbol.getParityCollectorClass().equals(BtcTurkParityCollector.class)) {
-                    result.put(paritySymbol, new BigDecimal(pairMap.get("last")));
+                    ParitySymbol paritySymbol = ParitySymbol.valueOf(pairMap.get("pair"));
+
+                    if (paritySymbol.getParityCollectorClass().equals(BtcTurkParityCollector.class)) {
+                        result.put(paritySymbol, new BigDecimal(pairMap.get("last")));
+                    }
+                } catch (Exception ignored) {
                 }
             });
 

@@ -17,7 +17,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class BinanceParityCollector extends AbstractParityCollector {
 
@@ -53,10 +52,13 @@ public class BinanceParityCollector extends AbstractParityCollector {
             }
 
             response.getBody().forEach(pairMap -> {
-                ParitySymbol paritySymbol = ParitySymbol.valueOf(pairMap.get("symbol"));
+                try {
+                    ParitySymbol paritySymbol = ParitySymbol.valueOf(pairMap.get("symbol"));
 
-                if (paritySymbol.getParityCollectorClass().equals(BinanceParityCollector.class)) {
-                    result.put(paritySymbol, new BigDecimal(pairMap.get("price")));
+                    if (paritySymbol.getParityCollectorClass().equals(BinanceParityCollector.class)) {
+                        result.put(paritySymbol, new BigDecimal(pairMap.get("price")));
+                    }
+                } catch (Exception ignored) {
                 }
             });
 

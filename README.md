@@ -19,4 +19,4 @@
 ## WebSocket API
 - Websocket URL: https://parity-collector.herokuapp.com/parity-websocket
 
-- To get all parities, subscriber to: `/topic/parities`
+- To get all parities, subscribe to: `/topic/parities`
